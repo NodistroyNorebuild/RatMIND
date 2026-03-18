@@ -20,7 +20,7 @@ The rodent skeleton model has 38 DoF (degrees of freedom):
 Output joint angle vector: q(t) ∈ ℝ³⁸
 
 Pipeline snapshot (.pt) contains:
-    states      : (T, 116)  — from dannce_loader
+    states      : (T, 93)  — from dannce_loader
     joint_angles: (T, 38)   — from stac_loader
     meta        : dict      — fps, source, dimensions, etc.
 """
@@ -358,7 +358,7 @@ class STACResult:
     """STAC registration result for one session."""
     joint_angles: np.ndarray     # (T, 38)
     keypoints: np.ndarray        # (T, 23, 3) — original
-    states: np.ndarray           # (T, 116) — from dannce_loader
+    states: np.ndarray           # (T, 93) — from dannce_loader
     fps: float = 50.0
     source_path: Optional[str] = None
 
@@ -389,7 +389,7 @@ class STACResult:
         Otherwise → .npz with numpy arrays (rename .npz → .pt for consistency).
 
         Contents:
-            states       : (T, 116) float32
+            states       : (T, 93) float32
             joint_angles : (T, 38)  float32
             meta         : dict
         """
@@ -465,7 +465,7 @@ def run_stac(
     Parameters
     ----------
     keypoints : np.ndarray, (T, 23, 3)
-    states : np.ndarray, (T, 116) — from dannce_loader
+    states : np.ndarray, (T, 93) — from dannce_loader
     fps : float
     smooth_sigma : float
     source_path : str, optional

@@ -67,7 +67,7 @@ def test_constants():
     assert len(JOINT_NAMES) == N_KP
     assert REST_POSE.shape == (N_KP, 3)
     assert len(BEHAVIOURS) == len(STATE_NAMES) == TRANSITION_MATRIX.shape[0]
-    assert STATE_DIM == 116
+    assert STATE_DIM == 93
     assert POS_DIM + SPEED_DIM + COM_VEL_DIM == STATE_DIM
     assert N_JOINTS_DOF == 38
     assert len(JOINT_NAMES_DOF) == N_JOINTS_DOF
@@ -154,7 +154,7 @@ def test_save_load_roundtrip():
 
 
 def test_state_vector():
-    heading("7. 116维状态向量")
+    heading("7. 93维状态向量")
 
     kp, _ = generate_mock_session(T=500, fps=50.0, seed=33)
     seq = DANNCESequence(raw_keypoints=kp, fps=50.0)

@@ -34,7 +34,7 @@ def generate_stac_snapshot(
     out_path: Optional[str] = None,
 ) -> dict:
     """
-    End-to-end: mock keypoints → 116-dim states + 38-dim joint angles → .pt
+    End-to-end: mock keypoints → 93-dim states + 38-dim joint angles → .pt
 
     Parameters
     ----------
@@ -66,7 +66,7 @@ def generate_stac_snapshot(
     keypoints, labels = generate_mock_session(T=T, fps=fps, arena_radius=arena_radius, seed=seed)
     logger.info("Mock keypoints: %s", keypoints.shape)
 
-    # Step 2: DANNCE loader → 116-dim states
+    # Step 2: DANNCE loader → 93-dim states
     seq = DANNCESequence(raw_keypoints=keypoints, fps=fps)
     states = seq.states
     logger.info("States: %s", states.shape)

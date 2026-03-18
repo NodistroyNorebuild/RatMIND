@@ -4,7 +4,7 @@ upstream/hmm.py
 Hidden Markov Model with Gaussian emissions — Baum-Welch (EM).
 
 Spec (from project doc):
-    - Baum-Welch EM on 116-dim state vectors
+    - Baum-Welch EM on 93-dim state vectors
     - K hidden states: 20 (debug) / 100 (production)
     - Output: posterior zₜ ∈ ℝᴷ (soft assignment per frame)
     - Interface: forward() / reset() / state_dict()
@@ -15,7 +15,7 @@ Emission model: diagonal-covariance Gaussian per hidden state.
 Usage:
     from upstream.hmm import GaussianHMM
 
-    hmm = GaussianHMM(K=20, D=116, seed=42)
+    hmm = GaussianHMM(K=20, D=93, seed=42)
     hmm.fit(states, n_iter=50)           # Baum-Welch EM
     posteriors = hmm.forward(states)     # (T, K)
     hmm.save("hmm_result.pt")
@@ -75,7 +75,7 @@ class GaussianHMM(BaseUpstream):
     K : int
         Number of hidden states (20 debug / 100 production).
     D : int
-        Observation dimensionality (116 for our state vector).
+        Observation dimensionality (93 for our state vector).
     seed : int or None
         Random seed for initialization.
     reg : float
@@ -85,7 +85,7 @@ class GaussianHMM(BaseUpstream):
     def __init__(
         self,
         K: int = 20,
-        D: int = 116,
+        D: int = 93,
         seed: Optional[int] = None,
         reg: float = 1e-3,
     ):

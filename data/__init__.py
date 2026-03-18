@@ -18,7 +18,7 @@ RatMIND.data
     # ── 下游直接读 snapshot ──
     import torch
     snap = torch.load("snapshot.pt")
-    states = snap["states"]           # (T, 116)
+    states = snap["states"]           # (T, 93)
     joint_angles = snap["joint_angles"]  # (T, 38)
 """
 

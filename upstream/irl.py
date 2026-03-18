@@ -5,13 +5,13 @@ Maximum Entropy Inverse Reinforcement Learning (MaxEnt IRL).
 
 Spec (from 工程流程.docx):
     - MaxEnt IRL
-    - 3-layer residual MLP, 116-dim input
+    - 3-layer residual MLP, 93-dim input
     - Output: utility value u(sₜ) ∈ ℝ
     - Interface: forward() / reset() / state_dict()
 
 Architecture:
-    Input sₜ (116-dim)
-        → Linear(116, H) → ReLU → [residual block] ×2 → Linear(H, 1)
+    Input sₜ (93-dim)
+        → Linear(93, H) → ReLU → [residual block] ×2 → Linear(H, 1)
     Residual block: x + Linear(ReLU(Linear(x)))
 
 Training:
@@ -140,7 +140,7 @@ class ResidualMLP:
 
     def __init__(
         self,
-        D_in: int = 116,
+        D_in: int = 93,
         hidden_dim: int = 128,
         n_blocks: int = 2,
         rng: Optional[np.random.Generator] = None,
@@ -253,7 +253,7 @@ class MaxEntIRL(BaseUpstream):
     Parameters
     ----------
     D : int
-        State dimensionality (116).
+        State dimensionality (93).
     hidden_dim : int
         MLP hidden layer size.
     n_blocks : int
@@ -268,7 +268,7 @@ class MaxEntIRL(BaseUpstream):
 
     def __init__(
         self,
-        D: int = 116,
+        D: int = 93,
         hidden_dim: int = 128,
         n_blocks: int = 2,
         lr: float = 1e-3,

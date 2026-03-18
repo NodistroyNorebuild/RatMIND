@@ -1,13 +1,12 @@
 """
 dannce_loader.py
 ================
-Load DANNCE 3D keypoint data and construct 116-dim state vectors.
+Load DANNCE 3D keypoint data and construct 93-dim state vectors.
 
-State vector layout (116-dim):
+State vector layout (93-dim):
     [0:69]   — de-centred keypoint positions (23 joints × 3 coords)
     [69:92]  — keypoint speeds (23 joints, scalar per joint)
-    [92:115] — keypoint heights (23 joints, z-coord relative to ground)
-    [115:116] — centre-of-mass velocity (scalar)
+    [92:93] — centre-of-mass velocity (scalar)
 
 Expected DANNCE input format:
     .mat / .hdf5 / .npy file with shape (T, 23, 3) — T frames, 23 keypoints, xyz.
@@ -29,7 +28,7 @@ N_KEYPOINTS = 23
 POS_DIM = N_KEYPOINTS * 3        # 69
 SPEED_DIM = N_KEYPOINTS           # 23
 COM_VEL_DIM = 1                   # 1
-STATE_DIM = POS_DIM + SPEED_DIM + COM_VEL_DIM  # 116
+STATE_DIM = POS_DIM + SPEED_DIM + COM_VEL_DIM  # 93
 
 # Default DANNCE keypoint names (rat, 23 markers)
 DEFAULT_KEYPOINT_NAMES: list[str] = [
@@ -112,7 +111,7 @@ class DANNCESequence:
 
     @property
     def states(self) -> np.ndarray:
-        """Full 116-dim state vectors (T, 116)."""
+        """Full 93-dim state vectors (T, 93)."""
         if self._states is None:
             self._compute_all()
         return self._states  # type: ignore[return-value]
@@ -144,7 +143,7 @@ class DANNCESequence:
         com_speed = np.linalg.norm(dcom, axis=1, keepdims=True) / self.dt  # (T-1, 1)
         self._com_vel = np.vstack([np.zeros((1, 1)), com_speed])           # (T, 1)
 
-        # 5) Concatenate → 116-dim state
+        # 5) Concatenate → 93-dim state
         self._states = np.concatenate(
             [self._positions, self._speeds, self._com_vel],
             axis=1,
@@ -160,7 +159,7 @@ class DANNCESequence:
     # ── Slicing / windowing ────────────────────────────────────────────────
 
     def get_window(self, start: int, length: int) -> np.ndarray:
-        """Return a (length, 116) state window. Clamps to valid range."""
+        """Return a (length, 93) state window. Clamps to valid range."""
         end = min(start + length, self.T)
         start = max(0, start)
         return self.states[start:end]
