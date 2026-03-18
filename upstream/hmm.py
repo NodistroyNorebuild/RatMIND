@@ -338,7 +338,7 @@ class GaussianHMM(BaseUpstream):
         """
         Compute log p(xₜ | sₜ=k) for all t and k.
 
-        Returns shape (T, K, D).
+        Returns shape (T, K).
         """
         diff = states[:, None, :] - self.mu[None, :, :]  # (T, K, D)
         var = np.exp(self.log_var)  # (K, D)
