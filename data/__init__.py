@@ -33,7 +33,6 @@ from .dannce_loader import (
     STATE_DIM,
     POS_DIM,
     SPEED_DIM,
-    HEIGHT_DIM,
     COM_VEL_DIM,
     DEFAULT_KEYPOINT_NAMES,
 )
@@ -81,7 +80,7 @@ from .mock_generator_stac import (
 __all__ = [
     # dannce_loader
     "DANNCESequence", "load_dannce", "load_multiple",
-    "N_KEYPOINTS", "STATE_DIM", "POS_DIM", "SPEED_DIM", "HEIGHT_DIM", "COM_VEL_DIM",
+    "N_KEYPOINTS", "STATE_DIM", "POS_DIM", "SPEED_DIM", "COM_VEL_DIM",
     "DEFAULT_KEYPOINT_NAMES",
     # stac_loader
     "STACResult", "run_stac",

@@ -22,7 +22,6 @@ from data import (
     STATE_DIM,
     POS_DIM,
     SPEED_DIM,
-    HEIGHT_DIM,
     COM_VEL_DIM,
     # ── mock_generator_dannce ──
     generate_mock_session,
@@ -69,7 +68,7 @@ def test_constants():
     assert REST_POSE.shape == (N_KP, 3)
     assert len(BEHAVIOURS) == len(STATE_NAMES) == TRANSITION_MATRIX.shape[0]
     assert STATE_DIM == 116
-    assert POS_DIM + SPEED_DIM + HEIGHT_DIM + COM_VEL_DIM == STATE_DIM
+    assert POS_DIM + SPEED_DIM + COM_VEL_DIM == STATE_DIM
     assert N_JOINTS_DOF == 38
     assert len(JOINT_NAMES_DOF) == N_JOINTS_DOF
 
@@ -166,18 +165,16 @@ def test_state_vector():
 
     pos  = s[:, :POS_DIM]
     spd  = s[:, POS_DIM:POS_DIM + SPEED_DIM]
-    hgt  = s[:, POS_DIM + SPEED_DIM:POS_DIM + SPEED_DIM + HEIGHT_DIM]
-    cvel = s[:, -COM_VEL_DIM:]
 
+    cvel = s[:, -COM_VEL_DIM:]
     pos_3d = pos.reshape(T, N_KEYPOINTS, 3)
     assert np.abs(pos_3d.mean(axis=1)).max() < 1e-8
 
     assert spd.min() >= 0
-    assert hgt.min() >= -0.1
     assert cvel[0, 0] == 0.0
     assert cvel.min() >= 0
 
-    print(f"  {POS_DIM}+{SPEED_DIM}+{HEIGHT_DIM}+{COM_VEL_DIM} = {STATE_DIM}")
+    print(f"  {POS_DIM}+{SPEED_DIM}+{COM_VEL_DIM} = {STATE_DIM}")
     print("  ✅ 通过")
 
 

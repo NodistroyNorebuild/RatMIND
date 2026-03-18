@@ -387,6 +387,18 @@ class MaxEntIRL(BaseUpstream):
         Returns
         -------
         losses : list[float]
+
+        Note
+        ----
+        Currently, I use a fixed noise perturbation distribution as the
+        background.
+        The approximate policy expectation E_π[∇r(s)] is equivalent to the
+        contrastive learning (NCE) objective, rather than the strict
+        MaxEnt IRL.
+        After the interface of the downstream behavioral model is
+        determined, the background_states should be replaced with policy
+        rollout samples. At that time, only this function needs to be
+        modified, and the network structure remains unchanged.
         """
         T, D = demo_states.shape
         assert D == self.D

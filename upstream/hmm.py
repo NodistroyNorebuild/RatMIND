@@ -309,18 +309,13 @@ class GaussianHMM(BaseUpstream):
             self.A = log_xi_sum - logsumexp(log_xi_sum, axis=1, keepdims=True)
 
             # Emission parameters
-            gamma_sum = gamma.sum(axis=0)  # (K,)
-            for k in range(self.K):
-                w = gamma[:, k]  # (T,)
-                w_sum = gamma_sum[k] + 1e-12
+            gamma_sum = gamma.sum(axis=0) + 1e-12  # (K,)
+            self.mu = (gamma.T @ states) / gamma_sum[:, None]  # (K, D)
+            diff = states[:, None, :] - self.mu[None, :, :]  # (T, K, D)
+            self.log_var = np.log(
+                (gamma[:, :, None] * diff ** 2).sum(axis=0) / gamma_sum[:, None] + self.reg
+            )  # (K, D)
 
-                # Mean
-                self.mu[k] = (w[:, None] * states).sum(axis=0) / w_sum
-
-                # Variance
-                diff = states - self.mu[k]  # (T, D)
-                var_k = (w[:, None] * diff ** 2).sum(axis=0) / w_sum
-                self.log_var[k] = np.log(var_k + self.reg)
 
             if verbose and (it % 10 == 0 or it == n_iter - 1):
                 logger.info("  EM iter %3d/%d  LL=%.2f", it + 1, n_iter, ll)
@@ -343,21 +338,13 @@ class GaussianHMM(BaseUpstream):
         """
         Compute log p(xₜ | sₜ=k) for all t and k.
 
-        Returns shape (T, K).
+        Returns shape (T, K, D).
         """
-        T = states.shape[0]
-        log_B = np.zeros((T, self.K))
-
-        for k in range(self.K):
-            var_k = np.exp(self.log_var[k])  # (D,)
-            diff = states - self.mu[k]       # (T, D)
-            log_B[:, k] = -0.5 * (
-                self.D * np.log(2 * np.pi)
-                + self.log_var[k].sum()
-                + (diff ** 2 / var_k).sum(axis=1)
-            )
-
-        return log_B
+        diff = states[:, None, :] - self.mu[None, :, :]  # (T, K, D)
+        var = np.exp(self.log_var)  # (K, D)
+        mahal = (diff ** 2 / var[None, :, :]).sum(axis=2)  # (T, K)
+        log_det = self.log_var.sum(axis=1)  # (K,)
+        return -0.5 * (self.D * np.log(2 * np.pi) + log_det[None, :] + mahal)
 
     def _forward_pass(self, log_B: np.ndarray) -> np.ndarray:
         """
@@ -373,8 +360,7 @@ class GaussianHMM(BaseUpstream):
 
         # t=1..T-1
         for t in range(1, T):
-            for k in range(K):
-                log_alpha[t, k] = logsumexp(log_alpha[t - 1] + self.A[:, k]) + log_B[t, k]
+            log_alpha[t] = logsumexp(log_alpha[t - 1, :, None] + self.A, axis=0) + log_B[t]
 
         return log_alpha
 
@@ -392,34 +378,18 @@ class GaussianHMM(BaseUpstream):
 
         # t=T-2..0
         for t in range(T - 2, -1, -1):
-            for k in range(K):
-                log_beta[t, k] = logsumexp(self.A[k, :] + log_B[t + 1] + log_beta[t + 1])
+            log_beta[t] = logsumexp(self.A + log_B[t + 1] + log_beta[t + 1], axis=1)
 
         return log_beta
 
-    def _compute_xi_sum(
-        self, log_alpha: np.ndarray, log_beta: np.ndarray, log_B: np.ndarray
-    ) -> np.ndarray:
-        """
-        Compute sum_t ξₜ(i,j) in log space for transition matrix update.
-
-        Returns (K, K) log-summed transition counts.
-        """
-        T, K = log_B.shape
-        log_xi_sum = np.full((K, K), -np.inf)
-
-        for t in range(T - 1):
-            for i in range(K):
-                for j in range(K):
-                    val = (log_alpha[t, i] + self.A[i, j]
-                           + log_B[t + 1, j] + log_beta[t + 1, j])
-                    log_xi_sum[i, j] = np.logaddexp(log_xi_sum[i, j], val)
-
-        # Normalize
-        norm = logsumexp(log_xi_sum)
-        # No global norm needed here — M-step normalizes rows
-
-        return log_xi_sum
+    def _compute_xi_sum(self, log_alpha, log_beta, log_B):
+        log_xi = (
+                log_alpha[:-1, :, None]  # (T-1, K, 1)
+                + self.A[None, :, :]  # (1,   K, K)
+                + log_B[1:, None, :]  # (T-1, 1, K)
+                + log_beta[1:, None, :]  # (T-1, 1, K)
+        )  # → (T-1, K, K)
+        return logsumexp(log_xi, axis=0)  # (K, K)
 
     # ── Decoding ───────────────────────────────────────────────────
 

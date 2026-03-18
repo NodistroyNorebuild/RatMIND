@@ -111,7 +111,7 @@ def validate_snapshot(snapshot: dict) -> None:
     meta = snapshot["meta"]
 
     T = meta["T"]
-    assert states.shape == (T, 116), f"States shape: {states.shape}"
+    assert states.shape == (T, 93), f"States shape: {states.shape}"
     assert angles.shape == (T, 38), f"Angles shape: {angles.shape}"
     assert torch.isfinite(states).all(), "States contain NaN/Inf"
     assert torch.isfinite(angles).all(), "Angles contain NaN/Inf"

@@ -28,9 +28,8 @@ logger = logging.getLogger(__name__)
 N_KEYPOINTS = 23
 POS_DIM = N_KEYPOINTS * 3        # 69
 SPEED_DIM = N_KEYPOINTS           # 23
-HEIGHT_DIM = N_KEYPOINTS          # 23
 COM_VEL_DIM = 1                   # 1
-STATE_DIM = POS_DIM + SPEED_DIM + HEIGHT_DIM + COM_VEL_DIM  # 116
+STATE_DIM = POS_DIM + SPEED_DIM + COM_VEL_DIM  # 116
 
 # Default DANNCE keypoint names (rat, 23 markers)
 DEFAULT_KEYPOINT_NAMES: list[str] = [
@@ -59,7 +58,6 @@ class DANNCESequence:
     # ── Computed on demand (lazy) ──
     _positions: Optional[np.ndarray] = field(default=None, init=False, repr=False)
     _speeds: Optional[np.ndarray] = field(default=None, init=False, repr=False)
-    _heights: Optional[np.ndarray] = field(default=None, init=False, repr=False)
     _com_vel: Optional[np.ndarray] = field(default=None, init=False, repr=False)
     _states: Optional[np.ndarray] = field(default=None, init=False, repr=False)
 
@@ -139,20 +137,16 @@ class DANNCESequence:
         # Pad first frame with zeros
         self._speeds = np.vstack([np.zeros((1, N_KEYPOINTS)), joint_speed])  # (T, 23)
 
-        # 4) Heights: z-coordinate relative to floor (min-z per frame as ground proxy)
-        z = kp[:, :, 2]                              # (T, 23)
-        ground_z = z.min(axis=1, keepdims=True)       # (T, 1)
-        self._heights = z - ground_z                  # (T, 23)
 
-        # 5) COM velocity scalar: ||Δcom|| / dt
+        # 4) COM velocity scalar: ||Δcom|| / dt
         com_flat = com.squeeze(1)                     # (T, 3)
         dcom = np.diff(com_flat, axis=0)              # (T-1, 3)
         com_speed = np.linalg.norm(dcom, axis=1, keepdims=True) / self.dt  # (T-1, 1)
         self._com_vel = np.vstack([np.zeros((1, 1)), com_speed])           # (T, 1)
 
-        # 6) Concatenate → 116-dim state
+        # 5) Concatenate → 116-dim state
         self._states = np.concatenate(
-            [self._positions, self._speeds, self._heights, self._com_vel],
+            [self._positions, self._speeds, self._com_vel],
             axis=1,
         )
         assert self._states.shape == (T, STATE_DIM), (
@@ -161,7 +155,7 @@ class DANNCESequence:
 
     def invalidate_cache(self) -> None:
         """Call if raw_keypoints is mutated in-place."""
-        self._positions = self._speeds = self._heights = self._com_vel = self._states = None
+        self._positions = self._speeds = self._com_vel = self._states = None
 
     # ── Slicing / windowing ────────────────────────────────────────────────
 
