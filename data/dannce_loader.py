@@ -96,13 +96,6 @@ class DANNCESequence:
         return self._speeds  # type: ignore[return-value]
 
     @property
-    def heights(self) -> np.ndarray:
-        """Per-joint height (z relative to ground plane) (T, 23)."""
-        if self._heights is None:
-            self._compute_all()
-        return self._heights  # type: ignore[return-value]
-
-    @property
     def com_velocity(self) -> np.ndarray:
         """Centre-of-mass velocity scalar (T, 1)."""
         if self._com_vel is None:
@@ -294,7 +287,6 @@ if __name__ == "__main__":
     print(f"State dim       : {s.shape[1]}  (expect {STATE_DIM})")
     print(f"Positions range : [{seq.positions.min():.2f}, {seq.positions.max():.2f}]")
     print(f"Speeds range    : [{seq.speeds.min():.2f}, {seq.speeds.max():.2f}]")
-    print(f"Heights range   : [{seq.heights.min():.2f}, {seq.heights.max():.2f}]")
     print(f"COM vel range   : [{seq.com_velocity.min():.2f}, {seq.com_velocity.max():.2f}]")
 
     # Window iterator
